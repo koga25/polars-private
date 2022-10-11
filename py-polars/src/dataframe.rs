@@ -626,6 +626,13 @@ impl PyDataFrame {
         })
     }
 
+    #[staticmethod]
+    fn start_datetime_c_api() {
+        unsafe {
+            pyo3_ffi::PyDateTime_IMPORT();
+        }
+    }
+
     pub fn list_of_dicts(&self) -> PyObject {
         Python::with_gil(|py| {
             let df = &self.df;
