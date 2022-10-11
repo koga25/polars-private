@@ -3,7 +3,7 @@ requires = ["maturin>=0.13,<0.14"]
 build-backend = "maturin"
 
 [project]
-name = "polars"
+name = "polarscnj"
 dependencies = [
   "typing_extensions >= 4.0.0; python_version < '3.10'",
 ]

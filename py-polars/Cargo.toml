@@ -37,6 +37,10 @@ serde_json = { version = "1", optional = true }
 thiserror = "^1.0"
 chrono = "0.4"
 
+[dependencies.pyo3-ffi]
+version = "*"
+features = ["extension-module"]
+
 
 
 # features are only there to enable building a slim binary for the benchmark in CI

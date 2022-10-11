@@ -1453,6 +1453,7 @@ dependencies = [
  "polars-lazy",
  "polars-sql",
  "pyo3",
+ "pyo3-ffi",
  "serde_json",
  "thiserror",
 ]
