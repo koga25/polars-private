@@ -564,6 +564,68 @@ impl PyDataFrame {
         })
     }
 
+    pub fn row_tuple2(&self, idx: i64) -> Py<PyTuple> {
+        let (height, width) = self.df.shape();
+        let index = idx as usize; 
+        Python::with_gil(|py| {
+            unsafe {
+                let list = pyo3_ffi::PyList_New(height as pyo3_ffi::Py_ssize_t);
+                let columns = self.df.get_columns();
+                let column_names = self.df.get_column_names();
+                let mut column_names_c_char: Vec<*mut pyo3_ffi::PyObject> = Vec::<*mut pyo3_ffi::PyObject>::with_capacity(width);
+                column_names.iter().for_each(|s| {
+                    let ptr = (*s).as_ptr() as *const core::ffi::c_char;
+                    let len = (*s).len() as pyo3_ffi::Py_ssize_t;
+                    column_names_c_char.push(pyo3_ffi::PyUnicode_FromStringAndSize(ptr, len))
+                });
+                let datetime_type = (*pyo3_ffi::PyDateTimeAPI()).DateTimeType;
+                let datetime_function = (*pyo3_ffi::PyDateTimeAPI()).DateTime_FromDateAndTime;
+                let mut i: pyo3_ffi::Py_ssize_t = 0;
+                for currRow in 0..height {
+                    let currDict = pyo3_ffi::PyDict_New();
+
+                    for currColumn in 0..width {
+                        if let AnyValue::Int64(v) = columns[currColumn].get(currRow) {
+                            pyo3_ffi::PyDict_SetItem(currDict, column_names_c_char[currColumn], pyo3_ffi::PyLong_FromLongLong(v));
+                        } else if let AnyValue::Float64(v) = columns[currColumn].get(currRow) {
+
+                            pyo3_ffi::PyDict_SetItem(currDict, column_names_c_char[currColumn],pyo3_ffi::PyFloat_FromDouble(v));
+                        } else if let AnyValue::Utf8(v) = columns[currColumn].get(currRow) {
+                            let ptr = v.as_ptr() as *const core::ffi::c_char;
+                            let len = v.len() as pyo3_ffi::Py_ssize_t;
+                            pyo3_ffi::PyDict_SetItem(currDict, column_names_c_char[currColumn], pyo3_ffi::PyUnicode_FromStringAndSize(ptr, len));
+                        } else if let AnyValue::Datetime(v, _tu, _tz) = columns[currColumn].get(currRow) {
+                            let nanoseconds = v % 1_000_000_000;
+                            let microseconds = (nanoseconds / 1000) as i32;
+                            let rust_date = NaiveDateTime::from_timestamp(
+                                (v / 1_000_000_000) as i64,
+                                (nanoseconds) as u32,
+                            );
+                            let time = datetime_function(
+                                rust_date.year() as i32, 
+                                rust_date.month() as i32,
+                                rust_date.day() as i32,
+                                rust_date.hour() as i32,
+                                rust_date.minute() as i32,
+                                rust_date.second() as i32,
+                                microseconds,
+                                pyo3_ffi::Py_None(),
+                                datetime_type,
+                            );
+                            
+                            pyo3_ffi::PyDict_SetItem(currDict, column_names_c_char[currColumn], time);
+                        } else {
+                            pyo3_ffi::PyDict_SetItem(currDict, column_names_c_char[currColumn], pyo3_ffi::Py_None());
+                        }
+                    }
+                    pyo3_ffi::PyList_SET_ITEM(list, i, currDict);
+                    i += 1;
+                }   
+                Py::from_owned_ptr(py, list)     
+            }
+        })
+    }
+
     pub fn list_of_dicts(&self) -> PyObject {
         Python::with_gil(|py| {
             let df = &self.df;

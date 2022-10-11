@@ -1655,6 +1655,9 @@ class DataFrame:
         pydf = self._df
         return pydf.list_of_dicts()
     
+    def start_datetime_c_api(self):
+        self._df.start_datetime_c_api()
+    
 
     def to_numpy(self) -> np.ndarray[Any, Any]:
         """
