@@ -1,14 +1,14 @@
 [package]
 name = "py-polars"
-version = "0.14.15"
-authors = ["ritchie46 <ritchie46@gmail.com>"]
+version = "0.1.0"
+authors = ["koga25 <lucasvas100@gmail.com>"]
 documentation = "https://pola-rs.github.io/polars/py-polars/html/reference/index.html"
 edition = "2021"
-homepage = "https://github.com/pola-rs/polars"
+homepage = "https://github.com/koga25/polars-private"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/pola-rs/polars"
-description = "Blazingly fast DataFrame library"
+repository = "https://github.com/koga25/polars-private"
+description = "Fork from polars repository, faster conversions to python"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
